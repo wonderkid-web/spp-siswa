@@ -9,7 +9,7 @@ import { supabase } from "@/utils/supabase/client";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-function page() {
+function Page() {
   const { handleSubmit, register } = useForm<FormLogin>();
   const router = useRouter()
 
@@ -98,4 +98,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
