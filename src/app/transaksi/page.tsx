@@ -1,6 +1,6 @@
 "use client";
 
-import { getBulanName } from "@/helper/client";
+import { getBulanName, showTanggal } from "@/helper/client";
 import { Tahun, Transaksi } from "@/types";
 import { supabase } from "@/utils/supabase/client";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
@@ -49,11 +49,10 @@ export default function Home() {
       .eq("nis", session?.user?.nis)
       .eq("tahun", selectedPeriod);
 
-
     if (data?.length) {
       setTransaksi(data);
-    }else{
-        setTransaksi([])
+    } else {
+      setTransaksi([]);
     }
   };
 
@@ -87,9 +86,9 @@ export default function Home() {
             onChange={(e: any) => setSelectedPeriod(e.target.value)}
           >
             <option value="">-- Pilih Periode --</option>
-            <option value="2023">Tahun 2023</option>
             <option value="2024">Tahun 2024</option>
             <option value="2025">Tahun 2025</option>
+            <option value="2026">Tahun 2026</option>
           </select>
         </div>
 
@@ -110,7 +109,7 @@ export default function Home() {
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
                   Jumlah
                 </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                <th className="text-center px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-xs font-semibold text-white uppercase tracking-wider">
                   Tanggal
                 </th>
                 <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
@@ -119,28 +118,39 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {transaksi.map((t, i) => (
-                <tr key={uuid()} className="bg-gray-100">
-                  <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                    {i + 1}
-                  </td>
-                  <td className="text-center px-5 py-5 border-b border-gray-200 text-sm">
-                    {+t.kode < 7 ? "1" : "2"}
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                    {getBulanName(t.kode)}
-                  </td>
-                  <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                    Rp. 80.000
-                  </td>
-                  <td className="px-5 py-5 capitalize border-b border-gray-200 text-sm">
-                    {t.created_at}
-                  </td>
-                  <td className="text-center px-5 py-5 capitalize border-b border-gray-200 text-sm">
-                    {t.status ? "Lunas" : "Menunggu"}
+              {transaksi.length ? (
+                transaksi.map((t, i) => (
+                  <tr key={uuid()} className="bg-gray-100">
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {i + 1}
+                    </td>
+                    <td className="text-center px-5 py-5 border-b border-gray-200 text-sm">
+                      {+t.kode < 7 ? "1" : "2"}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      {getBulanName(t.kode)}
+                    </td>
+                    <td className="px-5 py-5 border-b border-gray-200 text-sm">
+                      Rp. 80.000
+                    </td>
+                    <td className="px-5 py-5 capitalize border-b text-center border-gray-200 text-sm">
+                      {showTanggal(t.created_at)}
+                    </td>
+                    <td className="text-center px-5 py-5 capitalize border-b border-gray-200 text-sm">
+                      {t.status ? "Lunas" : "Menunggu"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="bg-gray-100">
+                  <td
+                    colSpan={6}
+                    className="text-gray-600 text-2xl text-center *:first-letter: px-5 py-5 border-b border-gray-200"
+                  >
+                    Data Kosong
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         )}

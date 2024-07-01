@@ -1,6 +1,8 @@
 import { Siswa } from "@/types"
 import { supabase } from "@/utils/supabase/client"
 import { PostgrestSingleResponse } from "@supabase/supabase-js"
+import { format, parseISO } from "date-fns"
+import { id } from "date-fns/locale"
 
 export const getDataSiswaClient = async () =>{
     const siswa : PostgrestSingleResponse<Siswa[]> = await supabase.from("siswa").select("*")
@@ -24,3 +26,12 @@ export const getBulanName = (kode: string): string => {
     };
     return bulanMap[kode] || "Invalid code";
   };
+
+
+export const showTanggal = (tanggal:string) =>{
+  const date = parseISO(tanggal);
+  
+  const formattedDate = format(date, 'EEEE, yyyy-MM-dd HH:mm:ss');
+
+  return formattedDate
+}

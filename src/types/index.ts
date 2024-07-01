@@ -57,3 +57,15 @@ export type Bulan =
   | "desember";
 
 export type Kode = | "01"| "02"| "03"| "04"| "05"| "06"| "07"| "08"| "09"| "10"| "11"| "12"
+
+export type FormLogin = {
+        nis: string;
+        password: string;
+}
+
+export type FormRegister = {
+        nis: string;
+        password: string;
+        kelas: string;
+        nama: string;
+}

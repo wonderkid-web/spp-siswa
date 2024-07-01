@@ -17,10 +17,7 @@ export const option: AuthOptions = {
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
-      credentials: {
-        nis: { label: "NISN", type: "text", placeholder: "NISN Siswa" },
-        password: { label: "password", type: "password", placeholder:"Password Siswa" },
-      },
+    
 
       // @ts-ignore
       async authorize(credentials:Record<"nis" | "password", string| string>, req) {
@@ -38,7 +35,10 @@ export const option: AuthOptions = {
           .from("siswa")
           .select("*");
 
+
         const adaSiswa = await checkSiswa(siswa.data!, credentials);
+
+        console.log(adaSiswa)
 
         if (adaSiswa) {
           return adaSiswa;
@@ -62,4 +62,7 @@ export const option: AuthOptions = {
       return { ...session, ...token };
     },
   },
+  pages:{
+    signIn: "/auth/signin"
+  }
 };

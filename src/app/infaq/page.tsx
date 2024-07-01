@@ -4,17 +4,32 @@ import { KodeBayar, Semester, Siswa } from "@/types";
 import { supabase } from "@/utils/supabase/client";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import uuid from "react-uuid";
 
 export default function Home() {
   const [selectedPeriod, setSelectedPeriod] = useState(1);
   const [semester, setSemester] = useState<Semester[]>([]);
   const [kode, setKode] = useState<KodeBayar | []>([]);
   const { status, data: session } = useSession();
-  const router = useRouter()
 
   const handleTransaction = async (kodeBaru: Semester["kode"]) => {
+    // @ts-ignore
+    delete session?.user?.password;
+    // @ts-ignore
+    delete session?.user?.created_at;
+
+    const tahun = new Date().getFullYear();
+
+    const newTransaksi = {
+      ...session?.user,
+      kode: kodeBaru,
+      tahun,
+      id: uuid(),
+    };
+
+    await supabase.from("transaksi").insert([newTransaksi]);
+
     const { data: siswa } = await supabase.from("siswa").select("kode");
     if (siswa?.length) {
       const updateKode = [...siswa[0].kode, kodeBaru];
@@ -27,15 +42,20 @@ export default function Home() {
         .eq("nis", session?.user?.nis)
         .select();
 
-        getKode()
+      getKode();
     }
   };
 
   const getKode = async () => {
-    const { data }: PostgrestSingleResponse<{ kode: KodeBayar }> =
-      await supabase.from("siswa").select("kode").single();
-    if (data?.kode) {
-      setKode(data.kode);
+    const { data }: PostgrestSingleResponse<Siswa[]> =
+      await supabase
+        .from("siswa")
+        .select("*")
+        // @ts-ignore
+        .eq("nis", session?.user.nis)
+    console.log(data);
+    if (data?.length) {
+      setKode(data[0].kode);
     }
   };
 
@@ -53,6 +73,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <pre>{JSON.stringify(kode, null, 2)}</pre>
       {/* Sidebar Section - assuming it's imported or implemented */}
       {/* <div className="style/sidebar.php"></div> */}
 
