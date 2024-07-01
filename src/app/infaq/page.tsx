@@ -73,7 +73,6 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <pre>{JSON.stringify(kode, null, 2)}</pre>
       {/* Sidebar Section - assuming it's imported or implemented */}
       {/* <div className="style/sidebar.php"></div> */}
 
