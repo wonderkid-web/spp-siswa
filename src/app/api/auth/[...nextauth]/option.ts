@@ -38,8 +38,6 @@ export const option: AuthOptions = {
 
         const adaSiswa = await checkSiswa(siswa.data!, credentials);
 
-        console.log(adaSiswa)
-
         if (adaSiswa) {
           return adaSiswa;
         }

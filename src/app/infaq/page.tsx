@@ -30,12 +30,14 @@ export default function Home() {
 
     await supabase.from("transaksi").insert([newTransaksi]);
 
-    const { data: siswa } = await supabase.from("siswa").select("kode");
+    // @ts-ignore
+    const { data: siswa } = await supabase.from("siswa").select("*").eq('nis', session?.user?.nis)
+
     if (siswa?.length) {
       const updateKode = [...siswa[0].kode, kodeBaru];
 
       // @ts-ignore
-      const { data, error } = await supabase
+      await supabase
         .from("siswa")
         .update({ kode: updateKode })
         // @ts-ignore
@@ -47,13 +49,11 @@ export default function Home() {
   };
 
   const getKode = async () => {
-    const { data }: PostgrestSingleResponse<Siswa[]> =
-      await supabase
-        .from("siswa")
-        .select("*")
-        // @ts-ignore
-        .eq("nis", session?.user.nis)
-    console.log(data);
+    const { data }: PostgrestSingleResponse<Siswa[]> = await supabase
+      .from("siswa")
+      .select("*")
+      // @ts-ignore
+      .eq("nis", session?.user.nis);
     if (data?.length) {
       setKode(data[0].kode);
     }
