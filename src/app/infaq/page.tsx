@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { semester1, semester2 } from "@/static";
 import { KodeBayar, Semester, Siswa } from "@/types";
@@ -9,11 +10,15 @@ import uuid from "react-uuid";
 
 export default function Home() {
   const [selectedPeriod, setSelectedPeriod] = useState(1);
+  const [isDisabled, setIsDisabled] = useState(false)
   const [semester, setSemester] = useState<Semester[]>([]);
   const [kode, setKode] = useState<KodeBayar | []>([]);
   const { status, data: session } = useSession();
+  const [transaksi, setTransaksi] = useState()
+  
 
   const handleTransaction = async (kodeBaru: Semester["kode"]) => {
+    setIsDisabled(true)
     // @ts-ignore
     delete session?.user?.password;
     // @ts-ignore
@@ -45,10 +50,16 @@ export default function Home() {
         .select();
 
       getKode();
+      setIsDisabled(false)
     }
   };
 
   const getKode = async () => {
+    // @ts-ignore
+    const {data:transaction} = await supabase.from('transaksi').select("kode, status").eq('nis', session?.user.nis)
+    // @ts-ignore
+    setTransaksi(transaction)
+
     const { data }: PostgrestSingleResponse<Siswa[]> = await supabase
       .from("siswa")
       .select("*")
@@ -59,6 +70,17 @@ export default function Home() {
     }
   };
 
+  const checkStatus = (s:Semester) =>{
+    if(transaksi){
+      const filtered = transaksi.find(tr=> tr.kode == s.kode)
+      if(filtered){
+        return filtered.status
+      }else{
+        return false
+      }
+    }
+  }
+
   useEffect(() => {
     getKode();
     if (selectedPeriod == 1) {
@@ -66,7 +88,7 @@ export default function Home() {
     } else {
       setSemester(semester2);
     }
-  }, [selectedPeriod]);
+  }, [selectedPeriod, session?.user]);
 
   if (status == "loading" && kode)
     return <h1 className="text-center mt-48 text-2xl">Loading...</h1>;
@@ -130,16 +152,18 @@ export default function Home() {
                     Rp. 80.000
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 text-sm">
-                    {kode.includes(s.kode as never) ? (
+                    {checkStatus(s) ? (
                       <p className="px-2 py-1 rounded-md bg-green-500 font-bold text-white w-fit">
-                        Lunas
+                        lunas
                       </p>
                     ) : (
                       <button
+                        disabled={isDisabled}
                         onClick={() => handleTransaction(s.kode)}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
+                        className={`${isDisabled ? 'bg-gray-400 text-white' : 'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none'} px-4 py-2  rounded flex flex-col items-center `}
                       >
-                        Pilih
+                        <span>bayar/</span>
+                        <span>sedang di proses</span>
                       </button>
                     )}
                   </td>
