@@ -10,15 +10,14 @@ import uuid from "react-uuid";
 
 export default function Home() {
   const [selectedPeriod, setSelectedPeriod] = useState(1);
-  const [isDisabled, setIsDisabled] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(false);
   const [semester, setSemester] = useState<Semester[]>([]);
   const [kode, setKode] = useState<KodeBayar | []>([]);
   const { status, data: session } = useSession();
-  const [transaksi, setTransaksi] = useState()
-  
+  const [transaksi, setTransaksi] = useState();
 
   const handleTransaction = async (kodeBaru: Semester["kode"]) => {
-    setIsDisabled(true)
+    setIsDisabled(true);
     // @ts-ignore
     delete session?.user?.password;
     // @ts-ignore
@@ -36,7 +35,10 @@ export default function Home() {
     await supabase.from("transaksi").insert([newTransaksi]);
 
     // @ts-ignore
-    const { data: siswa } = await supabase.from("siswa").select("*").eq('nis', session?.user?.nis)
+    const { data: siswa } = await supabase
+      .from("siswa")
+      .select("*")
+      .eq("nis", session?.user?.nis);
 
     if (siswa?.length) {
       const updateKode = [...siswa[0].kode, kodeBaru];
@@ -50,15 +52,18 @@ export default function Home() {
         .select();
 
       getKode();
-      setIsDisabled(false)
+      setIsDisabled(false);
     }
   };
 
   const getKode = async () => {
     // @ts-ignore
-    const {data:transaction} = await supabase.from('transaksi').select("kode, status").eq('nis', session?.user.nis)
+    const { data: transaction } = await supabase
+      .from("transaksi")
+      .select("kode, status")
+      .eq("nis", session?.user.nis);
     // @ts-ignore
-    setTransaksi(transaction)
+    setTransaksi(transaction);
 
     const { data }: PostgrestSingleResponse<Siswa[]> = await supabase
       .from("siswa")
@@ -70,16 +75,31 @@ export default function Home() {
     }
   };
 
-  const checkStatus = (s:Semester) =>{
-    if(transaksi){
-      const filtered = transaksi.find(tr=> tr.kode == s.kode)
-      if(filtered){
-        return filtered.status
-      }else{
-        return false
+  const checkStatus = (s: Semester) => {
+    if (transaksi) {
+      const filtered = transaksi.find((tr) => tr.kode == s.kode);
+      if (filtered) {
+        return filtered.status;
+      } else {
+        return false;
       }
     }
-  }
+  };
+
+  const checkProgres = (s: Semester) => {
+    if (transaksi) {
+      const filtered = transaksi.find((tr) => tr.kode == s.kode);
+      if (filtered) {
+        if (filtered.status) {
+          return "Lunas";
+        } else {
+          return "Sedang Diproses Admin";
+        }
+      } else {
+        return "Lakukan Pembayaran";
+      }
+    }
+  };
 
   useEffect(() => {
     getKode();
@@ -98,7 +118,7 @@ export default function Home() {
       {/* Sidebar Section - assuming it's imported or implemented */}
       {/* <div className="style/sidebar.php"></div> */}
 
-      {/* Main Content */}
+ {/* Main Content */}
       <div className="main-content">
         <h2 className="text-2xl font-bold mb-4">DAFTAR PEMBAYARAN SPP</h2>
 
@@ -125,16 +145,13 @@ export default function Home() {
           <table className="min-w-full leading-normal">
             <thead>
               <tr>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Kode
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Uraian
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                  Jumlah
-                </th>
-                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                {["Kode", "Uraian", "Jumlah"].map((text) => (
+                  <th key={text} className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                    {text}
+                  </th>
+                ))}
+
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800  text-xs font-semibold text-white uppercase tracking-wider text-center">
                   Pilih
                 </th>
               </tr>
@@ -153,17 +170,22 @@ export default function Home() {
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 text-sm">
                     {checkStatus(s) ? (
-                      <p className="px-2 py-1 rounded-md bg-green-500 font-bold text-white w-fit">
+                      <p className="px-2 py-1 rounded-md bg-green-500 font-bold text-white w-fit mx-auto">
                         lunas
                       </p>
                     ) : (
                       <button
                         disabled={isDisabled}
                         onClick={() => handleTransaction(s.kode)}
-                        className={`${isDisabled ? 'bg-gray-400 text-white' : 'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none'} px-4 py-2  rounded flex flex-col items-center `}
+                        className={`${
+                          checkProgres(s) === "Sedang Diproses Admin"
+                            ? "bg-gray-400 text-white"
+                            : "bg-red-500 text-white hover:bg-red-600 focus:outline-none"
+                        } px-4 py-2 mx-auto  rounded flex flex-col items-center `}
                       >
-                        <span>bayar/</span>
-                        <span>sedang di proses</span>
+                        {/* <span>bayar/</span>
+                        <span>sedang di proses</span> */}
+                        {checkProgres(s)}
                       </button>
                     )}
                   </td>

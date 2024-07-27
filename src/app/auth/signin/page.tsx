@@ -5,7 +5,6 @@ import logo from "@/../../public/logo.png";
 import Image from "next/image";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FormLogin } from "@/types";
-import { supabase } from "@/utils/supabase/client";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -16,16 +15,23 @@ function Page() {
 
   const onSubmit:SubmitHandler<FormLogin> = async (form) =>{
     
-    const signin = await signIn("credentials", {
+    toast.promise(
+      signIn("credentials", {
         ...form,
         redirect: false,
-    })
-
-    if(signin?.ok){
-        router.push('/')
-    }else{
-      toast.error("Gagal Login, pastiin NIS & Password Kamu bener!")
-    }
+      }),
+      {
+        loading: "Proses Autentikasi...",
+        success: (data) => {
+          if (data?.ok) {
+            router.push("/");
+          } 
+          return "Berhasil Login";
+        },
+        error: "Gagal Login, pastiin NIS & Password Kamu bener",
+      }
+    );
+  
   }
 
   return (
