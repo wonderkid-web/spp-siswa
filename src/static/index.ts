@@ -53,3 +53,4 @@ export const semester2 : Semester[] = [
         bulan: "desember"
     },
 ]
+

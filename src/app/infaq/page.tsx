@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 import { semester1, semester2 } from "@/static";
-import { KodeBayar, Semester, Siswa } from "@/types";
+import { KodeBayar, Semester, Siswa, Transaksi } from "@/types";
 import { supabase } from "@/utils/supabase/client";
 import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { useSession } from "next-auth/react";
@@ -9,15 +9,13 @@ import { useEffect, useState } from "react";
 import uuid from "react-uuid";
 
 export default function Home() {
-  const [selectedPeriod, setSelectedPeriod] = useState(1);
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState(0);
   const [semester, setSemester] = useState<Semester[]>([]);
   const [kode, setKode] = useState<KodeBayar | []>([]);
   const { status, data: session } = useSession();
   const [transaksi, setTransaksi] = useState();
 
   const handleTransaction = async (kodeBaru: Semester["kode"]) => {
-    setIsDisabled(true);
     // @ts-ignore
     delete session?.user?.password;
     // @ts-ignore
@@ -52,7 +50,6 @@ export default function Home() {
         .select();
 
       getKode();
-      setIsDisabled(false);
     }
   };
 
@@ -77,9 +74,10 @@ export default function Home() {
 
   const checkStatus = (s: Semester) => {
     if (transaksi) {
-      const filtered = transaksi.find((tr) => tr.kode == s.kode);
-      if (filtered) {
-        return filtered.status;
+      const filtered: Transaksi = transaksi.find((tr) => tr.kode == s.kode);
+      console.log(filtered);
+      if (filtered?.status) {
+        return true;
       } else {
         return false;
       }
@@ -104,11 +102,26 @@ export default function Home() {
   useEffect(() => {
     getKode();
     if (selectedPeriod == 1) {
-      setSemester(semester1);
+      const filtered =
+        kode.length <= 5
+          ? [
+              ...semester1.filter((k) => kode.includes(k.kode)),
+              semester1[kode.length],
+            ]
+          : [...semester1.filter((k) => kode.includes(k.kode))];
+      setSemester(filtered);
     } else {
-      setSemester(semester2);
+      const filtered =
+      kode.length <= 5
+        ? [
+            ...semester2.filter((k) => kode.includes(k.kode)),
+            semester2[kode.length],
+          ]
+        : [...semester2.filter((k) => kode.includes(k.kode))];
+      setSemester(filtered);
     }
-  }, [selectedPeriod, session?.user]);
+  }, [selectedPeriod, session?.user] ,semester);
+
 
   if (status == "loading" && kode)
     return <h1 className="text-center mt-48 text-2xl">Loading...</h1>;
@@ -118,10 +131,10 @@ export default function Home() {
       {/* Sidebar Section - assuming it's imported or implemented */}
       {/* <div className="style/sidebar.php"></div> */}
 
- {/* Main Content */}
+      {/* Main Content */}
       <div className="main-content">
         <h2 className="text-2xl font-bold mb-4">DAFTAR PEMBAYARAN SPP</h2>
-
+        {/* <pre>{JSON.stringify(kode, null, 2)}</pre> */}
         {/* Select Periode Section */}
         <div className="select mb-4">
           <label htmlFor="periode" className="block mb-2">
@@ -141,12 +154,15 @@ export default function Home() {
         </div>
 
         {/* Payment List Section */}
-        {selectedPeriod && (
+        {selectedPeriod == 0  ? <h1>Belum Memilih</h1> : (
           <table className="min-w-full leading-normal">
             <thead>
               <tr>
                 {["Kode", "Uraian", "Jumlah"].map((text) => (
-                  <th key={text} className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th
+                    key={text}
+                    className="px-5 py-3 border-b-2 border-gray-200 bg-gray-800 text-left text-xs font-semibold text-white uppercase tracking-wider"
+                  >
                     {text}
                   </th>
                 ))}
@@ -175,8 +191,11 @@ export default function Home() {
                       </p>
                     ) : (
                       <button
-                        disabled={isDisabled}
-                        onClick={() => handleTransaction(s.kode)}
+                        disabled={checkProgres(s) === "Lunas"}
+                        onClick={() =>
+                          checkProgres(s) === "Lakukan Pembayaran" &&
+                          handleTransaction(s.kode)
+                        }
                         className={`${
                           checkProgres(s) === "Sedang Diproses Admin"
                             ? "bg-gray-400 text-white"

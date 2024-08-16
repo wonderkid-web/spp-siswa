@@ -90,7 +90,7 @@ function Page() {
               >
                 Sign in
               </button>
-              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+              {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Belum punya akun? daftar disini {"->  "}
                 <Link
                   href="/auth/signup"
@@ -98,7 +98,7 @@ function Page() {
                 >
                   Sign up
                 </Link>
-              </p>
+              </p> */}
             </form>
           </div>
         </div>
