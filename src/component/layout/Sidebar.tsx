@@ -30,7 +30,7 @@ export default function Sidebar() {
                 <span className="ms-3 group-hover:text-sky-600">Dashboard</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 href="/infaq"
                 className="flex items-center p-2 text-white rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -47,11 +47,9 @@ export default function Sidebar() {
                 <span className="flex-1 ms-3 group-hover:text-sky-600 whitespace-nowrap">
                   Bayar SPP
                 </span>
-                {/* <span className="inline-flex items-center justify-center px-2 ms-3 group-hover:text-sky-600 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
-              Pro
-            </span> */}
+            
               </Link>
-            </li>
+            </li> */}
 
             <li>
               <Link
